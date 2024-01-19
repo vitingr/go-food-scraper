@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
-
+	
 	"github.com/gocolly/colly"
 
 	"net/http"
@@ -15,6 +15,7 @@ import (
 )
 
 type item struct {
+	Unidade string `json:"unidade"`
 	Photo       string `json:"photo"`
 	Title       string `json:"title"`
 	Description string `json:"description"`
@@ -22,12 +23,6 @@ type item struct {
 	IsOffer     bool   `json:"isOffer"`
 	OfferPrice  string `json:"offerPrice"`
 }
-
-// func NewServer(c *mongo.Client) *Server {
-// 	return &Server {
-// 		client: c
-// 	}
-// }
 
 func handleGetSupermarketsData(w http.ResponseWriter, r *http.Request) {
 	data := getSupermarketData()
@@ -37,48 +32,69 @@ func handleGetSupermarketsData(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	json.NewEncoder(w).Encode(data)
-
 }
 
 func getSupermarketData() []item {
-	call := colly.NewCollector(
-		colly.AllowedDomains("https://www.higa.com.br/", "www.higa.com.br", "https://atacadao.com.br/catalogo", "www.atacadao.com.br/catalogo", "https://www.superpaguemenos.com.br/", "www.superpaguemenos.com.br"),
+	callPagueMenos := colly.NewCollector(
+		colly.AllowedDomains("https://atacadao.com.br/catalogo", "www.atacadao.com.br/catalogo", "https://www.superpaguemenos.com.br/", "www.superpaguemenos.com.br"),
+	)
+
+	callHiga := colly.NewCollector(
+		colly.AllowedDomains("https://www.higa.com.br/", "www.higa.com.br"),
 	)
 
 	var items []item
 
-	call.OnHTML("div.item-product", func(h *colly.HTMLElement) {
+	callPagueMenos.OnHTML("div.item-product", func(h *colly.HTMLElement) {
 
-		// h.ForEach("div.card-body", func(_ int, e *colly.HTMLElement) {
-			item := item{
-				Photo: h.ChildAttr("img", "data-src"),
-				Title: h.ChildText("h2.title"),
-				Price: h.ChildText("p.sale-price"),
-			}
+		item := item{
+			Unidade: "Pague menos",
+			Photo: h.ChildAttr("img", "data-src"),
+			Title: h.ChildText("h2.title"),
+			Price: h.ChildText("p.sale-price"),
+		}
 
-		// 	item.Title = strings.ReplaceAll(item.Title, "\n", "")
-		// 	item.Price = strings.ReplaceAll(item.Price, "\t", "")
-
-			items = append(items, item)
-		// })
+		items = append(items, item)
 	})
 
-	call.OnRequest(func(r *colly.Request) {
+	callHiga.OnHTML("div.swiper-slide", func(h *colly.HTMLElement) {
+		item := item{
+			Unidade: "Higa",
+			Photo: h.ChildAttr("img.produto-img", "src"),
+			Title: h.ChildText("h3.text-muted"),
+			Price: h.ChildText("span.fw-bolder"),
+		}
+
+		if item.Title != "" {
+			items = append(items, item)
+		}
+	})
+
+	callPagueMenos.OnRequest(func(r *colly.Request) {
 		fmt.Println(r.URL.String())
 	})
 
-	err := call.Visit("https://www.superpaguemenos.com.br/")
+	callHiga.OnRequest(func(r *colly.Request) {
+		fmt.Println(r.URL.String())
+	}) 
+
+	err := callPagueMenos.Visit("https://www.superpaguemenos.com.br/")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	higaContent, err := json.Marshal(items)
+	err = callHiga.Visit("https://www.higa.com.br/")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	productsContent, err := json.Marshal(items)
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	os.WriteFile("higa.json", higaContent, 0644)
+	os.WriteFile("data.json", productsContent, 0644)
 
 	return items
 }
