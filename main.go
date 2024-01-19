@@ -52,6 +52,7 @@ func getSupermarketData() []item {
 			Photo: h.ChildAttr("img", "data-src"),
 			Title: h.ChildText("h2.title"),
 			Price: h.ChildText("p.sale-price"),
+			OfferPrice: h.ChildText("p.sale-price")
 		}
 
 		items = append(items, item)
