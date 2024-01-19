@@ -51,7 +51,7 @@ func getSupermarketData() []item {
 			Unidade: "Pague menos",
 			Photo: h.ChildAttr("img", "data-src"),
 			Title: h.ChildText("h2.title"),
-			Price: h.ChildText("p.sale-price"),
+			Price: h.ChildText("p.unit-price"),
 			OfferPrice: h.ChildText("p.sale-price"),
 		}
 
