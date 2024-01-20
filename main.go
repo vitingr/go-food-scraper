@@ -56,6 +56,8 @@ func handleSearchSupermarketData(w http.ResponseWriter, r *http.Request) {
 func getSearchData(searchTerm string) []item {
 	var items []item
 
+	fmt.Println(searchTerm)
+
 	callPagueMenos := colly.NewCollector(
 		colly.AllowedDomains("https://atacadao.com.br/catalogo", "www.atacadao.com.br/catalogo", "https://www.superpaguemenos.com.br/", "www.superpaguemenos.com.br"),
 	)
@@ -74,7 +76,7 @@ func getSearchData(searchTerm string) []item {
 			OfferPrice: h.ChildText("p.sale-price"),
 		}
 
-		if strings.Contains(item.Title, searchTerm) {
+		if strings.Contains(strings.ToLower(item.Title), strings.ToLower(searchTerm)) {
 			items = append(items, item)
 		}
 	})
@@ -87,7 +89,7 @@ func getSearchData(searchTerm string) []item {
 			Price:   h.ChildText("span.fw-bolder"),
 		}
 
-		if item.Title != "" && strings.Contains(item.Title, searchTerm) {
+		if item.Title != "" && strings.Contains(strings.ToLower(item.Title), strings.ToLower(searchTerm)) {
 			items = append(items, item)
 		}
 	})
