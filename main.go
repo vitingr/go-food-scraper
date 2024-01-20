@@ -205,7 +205,7 @@ func main() {
 	router.HandleFunc("/data", handleGetSupermarketsData).Methods("GET")
 
 	// Get SearchTerm Products Data
-	router.HandleFunc("/data/${searchTerm}", handleSearchSupermarketData).Methods("GET")
+	router.HandleFunc("/data/{searchTerm}", handleSearchSupermarketData).Methods("GET")
 
 	http.ListenAndServe(":3030", router)
 }
