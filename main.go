@@ -140,6 +140,7 @@ func getSupermarketData() []item {
 	// Vai carregar o código renderizado via javascript do website
 	chromedp.Run(saoVicenteContext,
 		chromedp.Navigate("https://www.sitemercado.com.br/supermercadossaovicente/santa-barbara-d-oeste-loja-sao-vicente-centro-sbo-centro-graca-martins"),
+		chromedp.Sleep(10*time.Second),
 		chromedp.Nodes(".list-product-item", &saoVicenteNodes, chromedp.ByQueryAll),
 	)
 
