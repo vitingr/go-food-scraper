@@ -156,7 +156,7 @@ func getSupermarketData() []item {
 
 		// Geração do item e adição do mesmo no objeto de produtos
 		product := item{
-			Unidade: "São Vicente"
+			Unidade: "São Vicente",
 			Photo: photo,
 			Title: name,
 			Price: price,
