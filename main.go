@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 	"context"
+	"time"
 
 	"github.com/gocolly/colly"
 	"github.com/chromedp/cdproto/cdp"
