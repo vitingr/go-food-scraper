@@ -74,6 +74,8 @@ func getSearchData(searchTerm string) []item {
 		chromedp.Nodes(".list-product-item", &saoVicenteNodes, chromedp.ByQueryAll),
 	)
 
+	fmt.Println("https://www.sitemercado.com.br/supermercadossaovicente/santa-barbara-d-oeste-loja-sao-vicente-centro-sbo-centro-graca-martins")
+
 	for _, node := range saoVicenteNodes {
 
 		var photo, name, price string
@@ -84,8 +86,6 @@ func getSearchData(searchTerm string) []item {
 			chromedp.AttributeValue(".list-product-link", "aria-label", &name, nil, chromedp.ByQuery, chromedp.FromNode(node)),
 			chromedp.Text(".preco-oferta", &price, chromedp.ByQuery, chromedp.FromNode(node)),
 		)
-
-		fmt.Println("https://www.sitemercado.com.br/supermercadossaovicente/santa-barbara-d-oeste-loja-sao-vicente-centro-sbo-centro-graca-martins")
 
 		// Geração do item e adição do mesmo no objeto de produtos
 		item := item{
@@ -183,6 +183,8 @@ func getSupermarketData() []item {
 		chromedp.Nodes(".list-product-item", &saoVicenteNodes, chromedp.ByQueryAll),
 	)
 
+	fmt.Println("https://www.sitemercado.com.br/supermercadossaovicente/santa-barbara-d-oeste-loja-sao-vicente-centro-sbo-centro-graca-martins")
+
 	for _, node := range saoVicenteNodes {
 
 		var photo, name, price string
@@ -193,8 +195,6 @@ func getSupermarketData() []item {
 			chromedp.AttributeValue(".list-product-link", "aria-label", &name, nil, chromedp.ByQuery, chromedp.FromNode(node)),
 			chromedp.Text(".preco-oferta", &price, chromedp.ByQuery, chromedp.FromNode(node)),
 		)
-
-		fmt.Println("https://www.sitemercado.com.br/supermercadossaovicente/santa-barbara-d-oeste-loja-sao-vicente-centro-sbo-centro-graca-martins")
 
 		// Geração do item e adição do mesmo no objeto de produtos
 		item := item{
