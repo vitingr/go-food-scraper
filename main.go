@@ -6,8 +6,11 @@ import (
 	"log"
 	"os"
 	"strings"
+	"context"
 
 	"github.com/gocolly/colly"
+	"github.com/chromedp/cdproto/cdp"
+	"github.com/chromedp/chromedp"
 
 	"net/http"
 
@@ -55,8 +58,6 @@ func handleSearchSupermarketData(w http.ResponseWriter, r *http.Request) {
 
 func getSearchData(searchTerm string) []item {
 	var items []item
-
-	fmt.Println(searchTerm)
 
 	callPagueMenos := colly.NewCollector(
 		colly.AllowedDomains("https://atacadao.com.br/catalogo", "www.atacadao.com.br/catalogo", "https://www.superpaguemenos.com.br/", "www.superpaguemenos.com.br"),
@@ -127,6 +128,71 @@ func getSupermarketData() []item {
 
 	var items []item
 
+	// Vai gerar uma context diferente para cada website a ser acessado pelo chromedp
+	saoVicenteContext, cancel := chromedp.NewContext(context.Background())
+	pavanContext, cancel := chromedp.NewContext(context.Background())
+	defer cancel()
+
+	// Scrape the DIV content from web js rendered websites
+	var saoVicenteNodes []*cdp.Node
+	var pavanContext []*cdp.Node
+
+	// Vai carregar o código renderizado via javascript do website
+	chromedp.Run(saoVicenteContext,
+		chromedp.Navigate("https://www.sitemercado.com.br/supermercadossaovicente/santa-barbara-d-oeste-loja-sao-vicente-centro-sbo-centro-graca-martins"),
+		chromedp.Nodes(".list-product-item", &saoVicenteNodes, chromedp.ByQueryAll),
+	)
+
+	for _, node := range saoVicenteNodes {
+
+		var photo, name, price string
+
+		// Vai realizar um laço de repetição para cada produto da loja
+		chromedp.Run(saoVicenteContext,
+			chromedp.AttributeValue("img", "src", &photo, nil, chromedp.ByQuery, chromedp.FromNode(node)),
+			chromedp.AttributeValue(".list-product-link", "aria-label", &name, nil, chromedp.ByQuery, chromedp.FromNode(node)),
+			chromedp.Text(".preco-oferta", &price, chromedp.ByQuery, chromedp.FromNode(node)),
+		)
+
+		// Geração do item e adição do mesmo no objeto de produtos
+		product := item{
+			Unidade: "São Vicente"
+			Photo: photo,
+			Title: name,
+			Price: price,
+		}
+
+		items = append(items, product)
+	}
+
+	// Vai carregar o código renderizado via javascript do website
+	chromedp.Run(pavanContext,
+		chromedp.Navigate("https://www.sitemercado.com.br/supermercadospavan/santa-barbara-d-oeste-loja-jardim-perola-jardim-esmeralda-av-do-comercio"),
+		chromedp.Nodes(".list-product-item", &pavanContext, chromedp.ByQueryAll),
+	)
+
+	for _, node := range pavanContext {
+
+		var photo, name, price string
+
+		// Vai realizar um laço de repetição para cada produto da loja
+		chromedp.Run(pavanContext,
+			chromedp.AttributeValue("img", "src", &photo, nil, chromedp.ByQuery, chromedp.FromNode(node)),
+			chromedp.AttributeValue(".list-product-link", "aria-label", &name, nil, chromedp.ByQuery, chromedp.FromNode(node)),
+			chromedp.Text(".preco-oferta", &price, chromedp.ByQuery, chromedp.FromNode(node)),
+		)
+
+		// Geração do item e adição do mesmo no objeto de produtos
+		product := item{
+			Unidade: "Pavan",
+			Photo: photo,
+			Title: name,
+			Price: price,
+		}
+
+		items = append(items, product)
+	}
+
 	callPagueMenos := colly.NewCollector(
 		colly.AllowedDomains("https://atacadao.com.br/catalogo", "www.atacadao.com.br/catalogo", "https://www.superpaguemenos.com.br/", "www.superpaguemenos.com.br"),
 	)
@@ -195,6 +261,7 @@ func main() {
 	// Configuração de Rotas
 	router := mux.NewRouter()
 
+	// Configurações dos middlewares de conexão da API
 	corsMiddleware := handlers.CORS(
 		handlers.AllowedOrigins([]string{"*"}),
 		handlers.AllowedMethods([]string{"*"}),
