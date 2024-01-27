@@ -135,7 +135,7 @@ func getSupermarketData() []item {
 
 	// Scrape the DIV content from web js rendered websites
 	var saoVicenteNodes []*cdp.Node
-	var pavanContext []*cdp.Node
+	var pavanNodes []*cdp.Node
 
 	// Vai carregar o código renderizado via javascript do website
 	chromedp.Run(saoVicenteContext,
@@ -168,10 +168,10 @@ func getSupermarketData() []item {
 	// Vai carregar o código renderizado via javascript do website
 	chromedp.Run(pavanContext,
 		chromedp.Navigate("https://www.sitemercado.com.br/supermercadospavan/santa-barbara-d-oeste-loja-jardim-perola-jardim-esmeralda-av-do-comercio"),
-		chromedp.Nodes(".list-product-item", &pavanContext, chromedp.ByQueryAll),
+		chromedp.Nodes(".list-product-item", &pavanNodes, chromedp.ByQueryAll),
 	)
 
-	for _, node := range pavanContext {
+	for _, node := range pavanNodes {
 
 		var photo, name, price string
 
